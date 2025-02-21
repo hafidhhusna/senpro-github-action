@@ -1,17 +1,17 @@
 name: Test, Build, and Deploy | Modul 01 - Lab2.2 Senior Project
- 
+
 on:
   push:
     branches: [main]
- 
+
 jobs:
   test-build:
     runs-on: ubuntu-latest
- 
+
     strategy:
       matrix:
         node-version: [16.x]
- 
+
     steps:
       - uses: actions/checkout@v2
       - name: Testing Build pre-Deploy
@@ -21,43 +21,44 @@ jobs:
           cache: "npm"
       - run: npm i
       - run: npm run build
+
   deploy:
-    needs: test-build
+    needs : test-build
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         node-version: [16.x]
-    
+
     steps:
       - name: Build app on VM
         uses: appleboy/ssh-action@master
-        with: 
+        with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          scripts: |
+          script: |
             eval "$(ssh-agent -s)"
-            ssh-add ~/.ssh/ssh-praktikan92
+            ssh-add ~/.ssh/ssh-praktikan54
             echo "Cek folder project";
             [ ! -d "${HOME}/senpro/498640/modul02/senpro-github-action/" ] &&
               {
                 echo "Repository belum di-clone. Cloning...";
                 mkdir -p ~/senpro/498640/modul02;
                 cd ~/senpro/498640/modul02;
-                git clone https://github.com/hafidhhusna/senpro-github-action.git;
+                git clone https://github.com/johanpramudito/senpro-github-action.git
                 cd ~/senpro/498640/modul02/senpro-github-action;
-                echo "Install Package dan Build Project";
+                echo "Install Package and Build Project";
                 npm install;
                 npm run build;
-              } || 
+              } ||
               {
                 echo "Repository sudah ada. Building...";
                 cd ~/senpro/498640/modul02/senpro-github-action;
                 git restore .;
                 git pull origin main;
-                echo "Install Package dan Build Project";
+                echo "Install Package and Build Project";
                 npm install;
                 npm run build;
               }
